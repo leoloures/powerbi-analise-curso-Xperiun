@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<!-- DS: v4 · Análise de Vendas & Margem -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Doc · Análise de Vendas &amp; Margem</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;800&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg-deepest:#0D0C0E; --bg-dark:#100F14; --bg-navy:#1A1346; --bg-indigo:#1D164A;
+  --bg-card:#14131A; --bg-elevated:#1C1B28; --bg-surface:#211F30;
+  --accent-deep:#1A1346; --accent-mid:#3951A3; --accent-blue:#4668D4;
+  --accent-bright:#5A7FFF; --accent-glow:#7099FF;
+  --accent-gold-deep:#B8955A; --accent-gold:#D4B896;
+  --accent-gold-bright:#E8C9A0; --accent-gold-glow:#F0DFC0;
+  --neon-cyan:#4FE3E8; --neon-magenta:#C47FFF; --neon-violet:#7B6FFF; --neon-teal:#3FD1B8;
+  --text-white:#FFFFFF; --text-primary:#F0EFF8; --text-secondary:#9DA5C8;
+  --text-muted:#6B729A; --text-faint:#3E4468;
+  --border-faint:rgba(255,255,255,0.06); --border-mid:rgba(255,255,255,0.12);
+  --border-accent:rgba(90,127,255,0.35); --border-gold:rgba(212,184,150,0.35);
+  --shadow-card:0 4px 24px rgba(0,0,0,0.4);
+  --shadow-elevated:0 8px 48px rgba(0,0,0,0.6);
+  --gradient-orb:radial-gradient(ellipse at 38% 52%, #1F2E75 0%, #16205A 12%, #0F143E 28%, #0A0C24 48%, #0D0C0E 70%);
+  --gradient-gold:linear-gradient(135deg, #F0DFC0 0%, #D4B896 55%, #B8955A 100%);
+  --gradient-surface:linear-gradient(135deg, #1C1B28 0%, #14131A 100%);
+  --font-display:'Bebas Neue', sans-serif;
+  --font-condensed:'Barlow Condensed', sans-serif;
+  --font-body:'Outfit', sans-serif;
+  --font-mono:'JetBrains Mono', 'Consolas', monospace;
+  --sidebar-w: 260px;
+  --topbar-h: 60px;
+}
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--bg-deepest);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+body::before {
+  content:''; position:fixed; inset:0; background: var(--gradient-orb);
+  z-index:-1; pointer-events:none;
+}
+
+/* ── Topbar ── */
+.topbar {
+  position: fixed; top: 0; left: var(--sidebar-w); right: 0; height: var(--topbar-h);
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-faint);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; z-index: 90;
+}
+.project-name { font-family: var(--font-body); font-size: 14px; color: var(--text-secondary); }
+.project-name strong { color: var(--text-white); font-weight: 600; }
+
+.search-wrap { position: relative; }
+.search-input {
+  width: 320px; padding: 9px 16px 9px 38px; font-family: var(--font-body); font-size: 13px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border-faint); border-radius: 999px;
+  color: var(--text-white); transition: all 0.2s;
+}
+.search-input::placeholder { color: var(--text-muted); }
+.search-input:focus { outline: none; border-color: var(--border-accent); background: rgba(255,255,255,0.06); }
+.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; pointer-events: none; }
+
+.menu-btn { display: none; background: transparent; border: 1px solid var(--border-mid); color: var(--text-white); font-family: var(--font-condensed); font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+
+/* ── Sidebar ── */
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-w); background: var(--bg-elevated);
+  border-right: 1px solid var(--border-faint);
+  overflow-y: auto; padding: 0 0 24px;
+  z-index: 100;
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  height: var(--topbar-h);
+  padding: 0 24px;
+  font-family: var(--font-condensed); font-size: 13px; font-weight: 700;
+  letter-spacing: 0.18em; color: var(--accent-glow); text-transform: uppercase;
+  border-bottom: 1px solid var(--border-faint);
+  margin-bottom: 24px;
+}
+.sidebar-brand .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent-glow); box-shadow: 0 0 8px var(--accent-glow);
+}
+.nav-section { margin-bottom: 28px; }
+.nav-section-title {
+  font-family: var(--font-condensed); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--text-muted); padding: 0 24px 8px;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 24px; font-family: var(--font-body); font-size: 13px;
+  color: var(--text-secondary); text-decoration: none;
+  border-left: 2px solid transparent; transition: all 0.15s;
+}
+.nav-link:hover { background: rgba(255,255,255,0.03); color: var(--text-white); }
+.nav-link.active { background: rgba(112,153,255,0.08); color: var(--accent-glow); border-left-color: var(--accent-glow); }
+.nav-link .icon { font-family: var(--font-condensed); font-weight: 700; opacity: 0.6; font-size: 11px; min-width: 18px; }
+.nav-link .count { margin-left: auto; font-family: var(--font-condensed); font-size: 11px; color: var(--text-muted); padding: 2px 6px; background: rgba(255,255,255,0.04); border-radius: 4px; }
+
+.nav-sub { padding-left: 36px; margin-top: 4px; }
+.nav-sub a {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 16px 4px 0; font-family: var(--font-body); font-size: 12.5px;
+  color: var(--text-secondary); text-decoration: none; line-height: 1.5;
+}
+.nav-sub a:hover { color: var(--accent-glow); }
+.nav-sub .badge-mini {
+  font-family: var(--font-condensed); font-size: 9px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 1px 6px; border-radius: 999px; flex-shrink: 0;
+}
+.badge-mini.fato { background: rgba(196,127,255,0.15); color: var(--neon-magenta); }
+.badge-mini.dim  { background: rgba(112,153,255,0.15); color: var(--accent-glow); }
+.badge-mini.med  { background: rgba(232,201,160,0.15); color: var(--accent-gold-bright); }
+.badge-mini.aux  { background: rgba(107,114,154,0.2);  color: var(--text-muted); }
+
+/* ── Main ── */
+.main { margin-left: var(--sidebar-w); padding-top: var(--topbar-h); min-height: 100vh; }
+.main-inner { max-width: 920px; margin: 0 auto; padding: 48px 48px 96px; position: relative; z-index: 2; }
+
+/* ── Sections ── */
+section { scroll-margin-top: 76px; position: relative; overflow: hidden; }
+section + section::before {
+  content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(232,201,160,0.08) 15%, rgba(232,201,160,0.32) 50%, rgba(232,201,160,0.08) 85%, transparent 100%);
+  z-index: 3; pointer-events: none;
+}
+.section-divider {
+  border: none; width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232,201,160,0.5) 50%, transparent);
+  margin: 64px 0;
+}
+.section-eyebrow { font-family: var(--font-condensed); font-size: 11px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+.section-title { font-family: var(--font-display); font-size: clamp(28px, 3.5vw, 42px); line-height: 1.05; letter-spacing: 0.04em; color: var(--text-white); margin-bottom: 14px; text-transform: uppercase; }
+.section-title .gold { background:var(--gradient-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.section-desc { font-family: var(--font-body); font-size: 16px; color: var(--text-secondary); line-height: 1.7; max-width: 64ch; margin-bottom: 36px; }
+.section-desc strong { color: var(--text-white); font-weight: 600; }
+
+/* ── Hero ── */
+.hero-block { padding: 36px 0 0; }
+.hero-eyebrow { font-family: var(--font-condensed); font-size: 12px; font-weight: 300; letter-spacing: 0.5em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 18px; }
+.hero-title { font-family: var(--font-condensed); font-size: clamp(28px, 4vw, 44px); font-weight: 300; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-white); line-height: 1.05; margin-bottom: 8px; word-break: break-word; }
+.hero-sub { font-family: var(--font-condensed); font-size: clamp(14px, 1.6vw, 18px); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background:var(--gradient-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom: 28px; }
+.hero-tagline { font-family: var(--font-body); font-style: italic; font-size: 17px; color: var(--text-secondary); max-width: 60ch; line-height: 1.6; }
+
+/* ── Metric row ── */
+.metric-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 32px 0 48px; }
+@media(max-width:780px){ .metric-row { grid-template-columns: repeat(2, 1fr); } }
+.metric-card { padding: 20px 18px; background: var(--gradient-surface); border: 1px solid var(--border-faint); border-radius: 12px; }
+.metric-num { font-family: var(--font-condensed); font-weight: 300; font-size: 32px; line-height: 1; color: var(--accent-gold-bright); margin-bottom: 6px; }
+.metric-label { font-family: var(--font-condensed); font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); }
+
+/* ── Inventory table ── */
+.inv-table { width: 100%; border-collapse: collapse; font-family: var(--font-body); font-size: 14px; margin-bottom: 32px; }
+.inv-table thead th { padding: 12px 14px; text-align: left; font-family: var(--font-condensed); font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-mid); }
+.inv-table tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border-faint); color: var(--text-primary); }
+.inv-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+.inv-table tbody td.tab-name { font-family: var(--font-mono); font-size: 13px; color: var(--accent-glow); font-weight: 500; }
+.inv-table tbody td.right { text-align: right; font-family: var(--font-condensed); font-weight: 600; color: var(--accent-gold-bright); }
+
+.badge-inline {
+  display: inline-block; font-family: var(--font-condensed); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px;
+}
+.badge-inline.fato { background: rgba(196,127,255,0.12); border: 1px solid rgba(196,127,255,0.4); color: var(--neon-magenta); }
+.badge-inline.dim  { background: rgba(112,153,255,0.12); border: 1px solid rgba(112,153,255,0.4); color: var(--accent-glow); }
+.badge-inline.med  { background: rgba(232,201,160,0.12); border: 1px solid rgba(232,201,160,0.4); color: var(--accent-gold-bright); }
+.badge-inline.aux  { background: rgba(107,114,154,0.15); border: 1px solid rgba(107,114,154,0.4); color: var(--text-muted); }
+
+/* ── Source / Config blocks ── */
+.callout { padding: 18px 22px; background: rgba(70,104,212,0.06); border: 1px solid var(--border-accent); border-radius: 10px; margin: 16px 0; font-family: var(--font-body); font-size: 14px; color: var(--text-primary); }
+.callout.warn { background: rgba(196,127,255,0.06); border-color: rgba(196,127,255,0.4); }
+.callout.warn::before { content: '⚠ '; color: var(--neon-magenta); font-weight: 700; }
+.callout strong { color: var(--text-white); }
+.callout code { font-family: var(--font-mono); font-size: 12.5px; color: var(--accent-gold-bright); padding: 2px 6px; background: rgba(0,0,0,0.3); border-radius: 4px; word-break: break-all; }
+
+.config-list { list-style: none; padding: 0; margin: 16px 0; }
+.config-list li { display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px dashed var(--border-faint); font-family: var(--font-body); font-size: 14px; }
+.config-list li:last-child { border-bottom: none; }
+.config-list .key { font-family: var(--font-condensed); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); min-width: 200px; }
+.config-list .val { color: var(--text-primary); }
+.config-list .val.on { color: var(--neon-magenta); font-weight: 600; }
+
+/* ── Table card ── */
+.table-card { background: var(--gradient-surface); border: 1px solid var(--border-faint); border-radius: 14px; box-shadow: var(--shadow-card); margin-bottom: 24px; overflow: hidden; }
+.table-card-head { padding: 20px 24px; border-bottom: 1px solid var(--border-faint); display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.table-card-name { font-family: var(--font-mono); font-size: 18px; font-weight: 600; color: var(--accent-glow); }
+.table-card-meta { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); }
+.table-card-body { padding: 20px 24px; }
+.table-card-body p { margin-bottom: 14px; color: var(--text-primary); font-size: 14px; line-height: 1.65; }
+.table-card-body .label { font-family: var(--font-condensed); font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin: 18px 0 8px; }
+
+.col-table { width: 100%; border-collapse: collapse; font-family: var(--font-body); font-size: 13px; }
+.col-table thead th { padding: 8px 10px; text-align: left; font-family: var(--font-condensed); font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-mid); }
+.col-table tbody td { padding: 8px 10px; border-bottom: 1px solid var(--border-faint); color: var(--text-primary); vertical-align: top; }
+.col-table .col-name { font-family: var(--font-mono); font-size: 12.5px; color: var(--accent-glow); font-weight: 500; }
+.col-table .col-type { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+.col-table .col-papel { color: var(--text-secondary); font-size: 12.5px; }
+.col-table .col-notas { color: var(--text-muted); font-size: 12px; font-style: italic; }
+
+details.source-m { margin-top: 16px; }
+details.source-m summary { font-family: var(--font-condensed); font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); cursor: pointer; padding: 6px 0; }
+details.source-m summary:hover { color: var(--accent-glow); }
+details.source-m pre { margin-top: 8px; }
+
+pre.code {
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6;
+  padding: 16px 20px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-faint);
+  border-left: 3px solid var(--accent-glow); border-radius: 8px;
+  color: var(--text-primary); overflow-x: auto; white-space: pre;
+}
+pre.code .k { color: var(--neon-magenta); font-weight: 600; }
+pre.code .f { color: var(--accent-glow); }
+pre.code .s { color: var(--accent-gold-bright); }
+pre.code .c { color: var(--text-muted); font-style: italic; }
+
+/* ── Measure group ── */
+.measure-group { margin-bottom: 36px; }
+.measure-group-title { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-white); margin-bottom: 6px; }
+.measure-group-meta { font-family: var(--font-body); font-size: 13px; color: var(--text-muted); margin-bottom: 18px; }
+
+/* Mini measure (expansível) */
+details.measure-mini {
+  background: rgba(255,255,255,0.02); border: 1px solid var(--border-faint);
+  border-radius: 8px; margin-bottom: 8px; overflow: hidden; transition: border-color 0.2s, background 0.2s;
+}
+details.measure-mini:hover { border-color: var(--border-mid); }
+details.measure-mini[open] { border-color: var(--border-accent); background: var(--gradient-surface); margin-bottom: 16px; }
+details.measure-mini summary {
+  display: grid; grid-template-columns: 1fr auto 24px; gap: 16px; align-items: center;
+  padding: 10px 16px; cursor: pointer; list-style: none;
+}
+details.measure-mini summary::-webkit-details-marker { display: none; }
+details.measure-mini summary::marker { content: ""; }
+details.measure-mini summary .name { font-family: var(--font-mono); font-size: 13px; color: var(--accent-gold-bright); font-weight: 500; }
+details.measure-mini summary .dax  { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 360px; }
+details.measure-mini summary .toggle { font-family: var(--font-condensed); font-size: 22px; font-weight: 300; color: var(--text-muted); transition: transform 0.25s; line-height: 1; text-align: center; }
+details.measure-mini[open] summary .toggle { transform: rotate(45deg); color: var(--accent-glow); }
+details.measure-mini[open] summary .dax { color: var(--text-secondary); }
+details.measure-mini .mini-body { padding: 14px 18px 18px; border-top: 1px dashed var(--border-faint); }
+details.measure-mini .mini-body p.desc { font-size: 14px; color: var(--text-primary); line-height: 1.65; margin-bottom: 12px; }
+details.measure-mini .mini-body p.desc strong { color: var(--text-white); font-weight: 600; }
+details.measure-mini .mini-body p.meta { font-family: var(--font-body); font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+details.measure-mini .mini-body p.meta code { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-secondary); padding: 1px 6px; background: rgba(255,255,255,0.04); border-radius: 4px; }
+details.measure-mini[open].anchor { border-color: rgba(232,201,160,0.4); }
+details.measure-mini .mini-body .label { font-family: var(--font-condensed); font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin: 12px 0 6px; }
+details.measure-mini .mini-body .measure-deps { font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); }
+details.measure-mini .mini-body .measure-deps code { font-family: var(--font-mono); font-size: 12px; color: var(--accent-glow); padding: 1px 5px; background: rgba(112,153,255,0.08); border-radius: 4px; margin: 0 2px; }
+details.measure-mini .mini-body pre.code { font-size: 12px; padding: 14px 18px; margin-top: 4px; }
+
+/* ── Relacionamentos · SVG ── */
+.rel-svg {
+  display: block; width: 100%; height: auto; max-width: 820px;
+  margin: 0 auto 28px; background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border-faint); border-radius: 12px; padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+.rel-table { width: 100%; border-collapse: collapse; font-family: var(--font-body); font-size: 13px; }
+.rel-table thead th { padding: 10px 12px; text-align: left; font-family: var(--font-condensed); font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-mid); }
+.rel-table tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border-faint); }
+.rel-table .from, .rel-table .to { font-family: var(--font-mono); font-size: 12px; color: var(--accent-glow); }
+.rel-table .card { font-family: var(--font-condensed); font-weight: 600; color: var(--text-secondary); letter-spacing: 0.05em; }
+.rel-table .dir-bi { color: var(--neon-magenta); font-weight: 600; }
+.rel-table .dir-single { color: var(--text-secondary); }
+
+/* ── Dependências ── */
+.dep-tree {
+  font-family: var(--font-mono); font-size: 13px; line-height: 1.85;
+  padding: 24px 28px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-faint);
+  border-radius: 12px; color: var(--text-primary); overflow-x: auto; white-space: pre;
+  margin-bottom: 28px;
+}
+.dep-tree .root   { color: var(--accent-gold-bright); font-weight: 600; }
+.dep-tree .branch { color: var(--accent-glow); }
+.dep-tree .leaf   { color: var(--text-secondary); }
+.dep-tree .dim    { color: var(--text-muted); font-style: italic; }
+
+.dep-reverse-card { background: var(--gradient-surface); border: 1px solid var(--border-faint); border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; }
+.dep-reverse-card .head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.dep-reverse-card .head .name { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--accent-gold-bright); }
+.dep-reverse-card .head .tag  { font-family: var(--font-condensed); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); padding: 2px 8px; border: 1px solid var(--border-faint); border-radius: 999px; }
+.dep-reverse-card .by { font-family: var(--font-body); font-size: 13px; color: var(--text-secondary); }
+.dep-reverse-card .by code { font-family: var(--font-mono); font-size: 12px; color: var(--accent-glow); padding: 1px 5px; background: rgba(112,153,255,0.08); border-radius: 4px; margin: 0 2px; }
+.dep-reverse-card .impl { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-faint); font-family: var(--font-body); font-style: italic; font-size: 13px; color: var(--text-muted); }
+
+/* ── Footer ── */
+.footer { margin-top: 80px; padding-top: 36px; border-top: 1px solid var(--border-faint); text-align: center; }
+.footer-divider { width: 60px; height: 1px; background: var(--gradient-gold); margin: 0 auto 24px; opacity: 0.7; }
+.footer-text { font-family: var(--font-body); font-size: 15px; color: var(--text-secondary); margin-bottom: 20px; }
+.footer-text strong { color: var(--text-white); }
+.footer-meta { font-family: var(--font-condensed); font-size: 10px; color: var(--text-muted); margin-top: 24px; letter-spacing: 0.25em; text-transform: uppercase; }
+
+/* ── DS V4 EXTRAS · gold-grid + beams + orb-v2 ── */
+@keyframes beamFall {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  5%   { opacity: 0.35; }
+  50%  { opacity: 0.9; }
+  95%  { opacity: 0.35; }
+  100% { transform: translateY(120vh); opacity: 0; }
+}
+@keyframes beamFallCenter {
+  0%   { transform: translate(-50%, -100%); opacity: 0; }
+  5%   { opacity: 0.35; }
+  50%  { opacity: 0.9; }
+  95%  { opacity: 0.35; }
+  100% { transform: translate(-50%, 120vh); opacity: 0; }
+}
+.gold-grid {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  display: flex; max-width: 1400px; margin: 0 auto; left: 0; right: 0; opacity: 0.85;
+}
+.gold-grid-col { flex: 1; height: 100%; border-left: 1px solid rgba(232,201,160,0.055); position: relative; overflow: hidden; }
+.gold-grid-col:last-child { border-right: 1px solid rgba(232,201,160,0.055); }
+.gold-beam {
+  position: absolute; top: 0; left: -1px; width: 1px;
+  background: linear-gradient(180deg, transparent 0%, rgba(232,201,160,0.5) 50%, transparent 100%);
+  animation-name: beamFall; animation-timing-function: linear; animation-iteration-count: infinite;
+}
+.gold-beam.short  { height: 180px; }
+.gold-beam.medium { height: 260px; }
+.gold-beam.tall   { height: 380px; }
+.gold-beam.center { left: 50%; transform: translateX(-50%); animation-name: beamFallCenter; }
+.gold-beam.strong { background: linear-gradient(180deg, transparent 0%, rgba(232,201,160,0.75) 50%, transparent 100%); }
+
+.section-orb {
+  position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(90px); opacity: 0.60;
+}
+.section-orb.blue-tall   { background: radial-gradient(ellipse 55% 78% at 38% 42%, #B8D0FF 0%, #6B92FF 6%, #4668D4 15%, #2D3F8A 28%, #1A1346 44%, transparent 62%); }
+.section-orb.blue-wide   { background: radial-gradient(ellipse 80% 58% at 58% 50%, #B8D0FF 0%, #6B92FF 7%, #4668D4 17%, #2D3F8A 32%, #1A1346 48%, transparent 65%); }
+.section-orb.purple-tall { background: radial-gradient(ellipse 55% 78% at 38% 42%, #D4C4FF 0%, #9583FF 6%, #6A5BDB 15%, #3A2E8A 28%, #170E45 44%, transparent 62%); }
+.section-orb.purple-wide { background: radial-gradient(ellipse 80% 58% at 58% 50%, #D4C4FF 0%, #9583FF 7%, #6A5BDB 17%, #3A2E8A 32%, #170E45 48%, transparent 65%); }
+.section-orb.blue-hint   { background: radial-gradient(ellipse 68% 72% at 52% 48%, #6B92FF 0%, #4668D4 10%, #2D3F8A 22%, #1A1346 40%, transparent 60%); opacity: 0.20; }
+.section-orb.purple-hint { background: radial-gradient(ellipse 68% 72% at 52% 48%, #7B6FFF 0%, #4A3EB0 8%, #2A1F6A 20%, #170E45 38%, transparent 58%); opacity: 0.20; }
+
+/* ── ANIMAÇÕES ── */
+@keyframes ambientBreathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.86; } }
+body::before { animation: ambientBreathe 12s ease-in-out infinite; }
+
+@keyframes heroFade {
+  from { opacity: 0; transform: translateY(28px); filter: blur(8px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+.anim-hero { opacity: 0; animation: heroFade 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.anim-d1 { animation-delay: 0.10s; }
+.anim-d2 { animation-delay: 0.28s; }
+.anim-d3 { animation-delay: 0.46s; }
+.anim-d4 { animation-delay: 0.64s; }
+
+.reveal { opacity: 0; transform: translateY(28px); filter: blur(4px); transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1), transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), filter 0.85s ease; will-change: opacity, transform, filter; }
+.reveal.is-visible { opacity: 1; transform: translateY(0); filter: blur(0); }
+.reveal.r-d1 { transition-delay: 0.08s; } .reveal.r-d2 { transition-delay: 0.16s; }
+.reveal.r-d3 { transition-delay: 0.24s; } .reveal.r-d4 { transition-delay: 0.32s; }
+
+@keyframes numPulse {
+  0%   { filter: drop-shadow(0 0 0 rgba(232,201,160,0)); }
+  35%  { filter: drop-shadow(0 0 36px rgba(232,201,160,0.55)); }
+  100% { filter: drop-shadow(0 0 14px rgba(232,201,160,0.20)); }
+}
+.num-pulse { animation: numPulse 1.4s ease-out forwards; }
+
+@keyframes particleFloat {
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  10%  { opacity: 0.55; }
+  90%  { opacity: 0.55; }
+  100% { transform: translateY(-110vh) translateX(var(--dx, 30px)); opacity: 0; }
+}
+.particle-field { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.particle { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: var(--accent-gold-bright); box-shadow: 0 0 6px var(--accent-gold-bright); bottom: -8px; animation: particleFloat linear infinite; opacity: 0; }
+.particle.blue { background: var(--accent-glow); box-shadow: 0 0 8px var(--accent-glow); }
+
+.nav-liquid { position: absolute; left: 0; width: 2px; background: var(--accent-glow); box-shadow: 0 0 12px var(--accent-glow); border-radius: 2px; transition: top 0.45s cubic-bezier(0.22, 1, 0.36, 1), height 0.45s cubic-bezier(0.22, 1, 0.36, 1); pointer-events: none; opacity: 0; }
+.nav-liquid.is-active { opacity: 1; }
+.sidebar.has-liquid .nav-link.active { border-left-color: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gold-beam { animation: none !important; opacity: 0.15 !important; }
+  body::before { animation: none !important; }
+  .anim-hero { animation: none !important; opacity: 1 !important; }
+  .reveal { opacity: 1 !important; transform: none !important; filter: none !important; transition: none !important; }
+  .particle-field { display: none !important; }
+}
+
+@media (max-width: 980px) {
+  .menu-btn { display: block; }
+  .topbar { left: 0; padding: 0 20px; }
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+  .sidebar.open { transform: translateX(0); box-shadow: 0 0 50px rgba(0,0,0,0.6); }
+  .main { margin-left: 0; }
+  .main-inner { padding: 32px 20px 64px; }
+  .search-input { width: 180px; }
+  .project-name { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Gold-grid + beams DS v4 -->
+<div class="gold-grid" aria-hidden="true">
+  <div class="gold-grid-col"></div>
+  <div class="gold-grid-col">
+    <div class="gold-beam medium" style="animation-duration:7s;animation-delay:0s;"></div>
+  </div>
+  <div class="gold-grid-col">
+    <div class="gold-beam tall strong" style="animation-duration:9s;animation-delay:3s;"></div>
+  </div>
+  <div class="gold-grid-col">
+    <div class="gold-beam medium center strong" style="animation-duration:8s;animation-delay:1.5s;"></div>
+  </div>
+  <div class="gold-grid-col">
+    <div class="gold-beam tall" style="animation-duration:10s;animation-delay:2s;"></div>
+  </div>
+  <div class="gold-grid-col">
+    <div class="gold-beam medium" style="animation-duration:7.5s;animation-delay:4.5s;"></div>
+  </div>
+  <div class="gold-grid-col"></div>
+</div>
+
+<!-- Particle field (JS popula) -->
+<div class="particle-field" aria-hidden="true"></div>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="project-name"><strong>Análise de Vendas &amp; Margem</strong> · Power BI</div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" type="text" placeholder="Buscar tabela ou medida..." id="search">
+  </div>
+  <button class="menu-btn" id="menu-toggle">≡</button>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="dot"></span>
+    <span>DOC · POWER BI</span>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Navegação</div>
+    <a href="#overview"       class="nav-link active"><span class="icon">00</span>Overview</a>
+    <a href="#tabelas"        class="nav-link"><span class="icon">01</span>Tabelas <span class="count">5</span></a>
+    <a href="#medidas"        class="nav-link"><span class="icon">02</span>Medidas <span class="count">60</span></a>
+    <a href="#relacionamentos" class="nav-link"><span class="icon">03</span>Relacionamentos <span class="count">2</span></a>
+    <a href="#dependencias"   class="nav-link"><span class="icon">04</span>Dependências</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Tabelas</div>
+    <div class="nav-sub">
+      <a href="#tab-ft_vendas"><span class="badge-mini fato">FATO</span>ft_vendas</a>
+      <a href="#tab-dim_produto"><span class="badge-mini dim">DIM</span>dim_produto</a>
+      <a href="#tab-dim_calendario"><span class="badge-mini dim">DIM</span>dim_calendario</a>
+      <a href="#tab-medidas"><span class="badge-mini med">MED</span>Medidas</a>
+      <a href="#tab-medidas-df"><span class="badge-mini med">MED</span>Medidas DF</a>
+      <a href="#tab-medidas-pareto"><span class="badge-mini med">MED</span>Medidas Pareto</a>
+      <a href="#tab-parametros"><span class="badge-mini aux">PARAM</span>Parâmetros (7)</a>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Medidas · Grupos</div>
+    <div class="nav-sub">
+      <a href="#grp-base">Base operacional</a>
+      <a href="#grp-ly">Comparativo LY</a>
+      <a href="#grp-yoy">Variações YoY</a>
+      <a href="#grp-margem">Margem &amp; Segurança</a>
+      <a href="#grp-pareto">Pareto</a>
+      <a href="#grp-df">Dynamic Fields</a>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+<div class="main-inner">
+
+  <!-- Hero -->
+  <div class="hero-block">
+    <p class="hero-eyebrow anim-hero anim-d1">Documentação Power BI</p>
+    <h1 class="hero-title anim-hero anim-d2">Análise de Vendas &amp; Margem</h1>
+    <p class="hero-sub anim-hero anim-d3">Modelo Comercial · gerado em maio 2026</p>
+    <p class="hero-tagline anim-hero anim-d4">Relatório de análise comercial de produtos — cobre faturamento, custos, margem bruta, comparativo YoY, Pareto por produto e precificação dinâmica com margem de segurança.</p>
+  </div>
+
+  <!-- 00 · Overview -->
+  <section id="overview">
+    <div class="section-orb blue-tall"   style="left:-12%;top:5%;width:780px;height:1000px;" aria-hidden="true"></div>
+    <div class="section-orb purple-hint" style="right:-15%;bottom:0%;width:700px;height:700px;" aria-hidden="true"></div>
+
+    <div class="metric-row">
+      <div class="metric-card"><div class="metric-num">5</div><div class="metric-label">Tabelas</div></div>
+      <div class="metric-card"><div class="metric-num">60</div><div class="metric-label">Medidas</div></div>
+      <div class="metric-card"><div class="metric-num">2</div><div class="metric-label">Relacionamentos</div></div>
+      <div class="metric-card"><div class="metric-num">28</div><div class="metric-label">Colunas</div></div>
+      <div class="metric-card"><div class="metric-num">7</div><div class="metric-label">Parâmetros</div></div>
+    </div>
+
+    <p class="section-eyebrow">00 · Overview</p>
+    <h2 class="section-title">Inventário de <span class="gold">tabelas</span></h2>
+    <p class="section-desc">Modelo estrela com 1 fato, 2 dimensões e 3 tabelas de medidas. <strong>Fonte única:</strong> planilha Excel via variável de caminho <code style="font-family:var(--font-mono);font-size:13px;color:var(--accent-gold-bright);">caminho_base</code>. Time intelligence manual — <code style="font-family:var(--font-mono);font-size:13px;color:var(--accent-gold-bright);">__PBI_TimeIntelligenceEnabled = 0</code>.</p>
+
+    <table class="inv-table">
+      <thead><tr><th>Tabela</th><th>Tipo</th><th>Colunas</th><th>Medidas</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td class="tab-name">ft_vendas</td><td><span class="badge-inline fato">Fato</span></td><td class="right">8</td><td class="right">—</td><td style="color:var(--text-muted);font-size:13px;">BaseFaturamento.xlsx · Sheet1</td></tr>
+        <tr><td class="tab-name">dim_produto</td><td><span class="badge-inline dim">Dimensão</span></td><td class="right">8</td><td class="right">—</td><td style="color:var(--text-muted);font-size:13px;">BaseFaturamento.xlsx · dedup</td></tr>
+        <tr><td class="tab-name">dim_calendario</td><td><span class="badge-inline dim">Dimensão</span></td><td class="right">8</td><td class="right">—</td><td style="color:var(--text-muted);font-size:13px;">CALENDARAUTO()</td></tr>
+        <tr><td class="tab-name">Medidas</td><td><span class="badge-inline med">Medidas</span></td><td class="right">—</td><td class="right">~33</td><td style="color:var(--text-muted);font-size:13px;">Tabela container</td></tr>
+        <tr><td class="tab-name">Medidas DF</td><td><span class="badge-inline med">Medidas</span></td><td class="right">—</td><td class="right">11</td><td style="color:var(--text-muted);font-size:13px;">Dynamic Fields</td></tr>
+        <tr><td class="tab-name">Medidas Pareto</td><td><span class="badge-inline med">Medidas</span></td><td class="right">—</td><td class="right">8</td><td style="color:var(--text-muted);font-size:13px;">Concentração Pareto</td></tr>
+        <tr><td class="tab-name">Parâmetros (7)</td><td><span class="badge-inline aux">Parâmetro</span></td><td class="right">—</td><td class="right">—</td><td style="color:var(--text-muted);font-size:13px;">GENERATESERIES · slicers</td></tr>
+      </tbody>
+    </table>
+
+    <p class="section-desc" style="margin-top:32px;"><strong>Fonte de dados:</strong> Excel — <code style="font-family:var(--font-mono);font-size:13px;color:var(--accent-gold-bright);">BaseFaturamento.xlsx</code> carregado via variável de ambiente <code style="font-family:var(--font-mono);font-size:13px;color:var(--accent-gold-bright);">caminho_base</code>. Colunas de origem: data, num_pedido, faturamento, custo, id_produto, quantidade.</p>
+
+    <div class="callout warn">
+      <strong>Path com variável:</strong> a fonte usa <code>caminho_base</code> em vez de caminho fixo. Ao migrar para outro ambiente, atualizar o parâmetro em <em>Transformar dados → Parâmetros</em> antes de atualizar.
+    </div>
+
+    <p class="section-desc" style="margin-top:32px;"><strong>Configurações relevantes do modelo:</strong></p>
+    <ul class="config-list">
+      <li><span class="key">Culture</span><span class="val">pt-BR</span></li>
+      <li><span class="key">Source Query Culture</span><span class="val">pt-BR</span></li>
+      <li><span class="key">Time Intelligence</span><span class="val on">DESATIVADA — implementada manualmente nas medidas DAX</span></li>
+      <li><span class="key">Data Source Version</span><span class="val">powerBI_V3</span></li>
+      <li><span class="key">Dev Mode</span><span class="val">Ativo (PBI_ProTooling)</span></li>
+      <li><span class="key">returnErrorValuesAsNull</span><span class="val">Sim</span></li>
+    </ul>
+  </section>
+
+  <hr class="section-divider"/>
+
+  <!-- 01 · Tabelas -->
+  <section id="tabelas">
+    <div class="section-orb purple-tall" style="left:-10%;top:5%;width:780px;height:1000px;" aria-hidden="true"></div>
+    <div class="section-orb blue-hint"   style="right:-15%;bottom:0%;width:700px;height:700px;" aria-hidden="true"></div>
+    <p class="section-eyebrow">01 · Tabelas</p>
+    <h2 class="section-title">Catálogo de <span class="gold">tabelas</span></h2>
+    <p class="section-desc">Cada tabela com descrição, granularidade, colunas tipadas e source resumido. Parâmetros agrupados ao final.</p>
+
+    <!-- ft_vendas -->
+    <article class="table-card" id="tab-ft_vendas">
+      <div class="table-card-head">
+        <span class="table-card-name">ft_vendas</span>
+        <span class="badge-inline fato">Fato</span>
+        <span class="table-card-meta">· 1 linha = 1 item de pedido · 8 colunas</span>
+      </div>
+      <div class="table-card-body">
+        <p>Fato principal do modelo — cada registro representa um item vendido com data, produto, receita, custo e quantidade. É o coração de todas as métricas comerciais: Faturamento, Custos, Pedidos e Qtd Vendida dependem diretamente das colunas desta tabela.</p>
+        <div class="label">Colunas</div>
+        <table class="col-table">
+          <thead><tr><th>Coluna</th><th>Tipo</th><th>Papel</th><th>Notas</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">data</td><td class="col-type">dateTime</td><td class="col-papel">Atributo</td><td class="col-notas">FK → dim_calendario[Date]</td></tr>
+            <tr><td class="col-name">num_pedido</td><td class="col-type">int64</td><td class="col-papel">Atributo</td><td class="col-notas">Não único por linha — 1 pedido, N itens</td></tr>
+            <tr><td class="col-name">faturamento</td><td class="col-type">int64</td><td class="col-papel">Métrica</td><td class="col-notas">Receita bruta do item</td></tr>
+            <tr><td class="col-name">custo</td><td class="col-type">double</td><td class="col-papel">Métrica</td><td class="col-notas">Custo direto do item</td></tr>
+            <tr><td class="col-name">id_produto</td><td class="col-type">int64</td><td class="col-papel">Chave estrangeira</td><td class="col-notas">FK → dim_produto[id_produto]</td></tr>
+            <tr><td class="col-name">quantidade</td><td class="col-type">int64</td><td class="col-papel">Métrica</td><td class="col-notas">Unidades vendidas</td></tr>
+            <tr><td class="col-name">unidade qtd</td><td class="col-type">string</td><td class="col-papel">Atributo</td><td class="col-notas">Ex: kg, un, cx</td></tr>
+            <tr><td class="col-name">id_produto_qtd</td><td class="col-type">calculada</td><td class="col-papel">Chave auxiliar</td><td class="col-notas">[id_produto]&"_"&[quantidade] — usada na análise de margem por SKU+qtd</td></tr>
+          </tbody>
+        </table>
+        <details class="source-m">
+          <summary>Source M (resumo)</summary>
+          <pre class="code">let
+  Fonte = Excel.Workbook(File.Contents(caminho_base & "\BaseFaturamento.xlsx")),
+  Sheet1 = Fonte{[Item="Sheet1",Kind="Sheet"]}[Data],
+  ...tipagem e renomeação de colunas...
+in tbl_final</pre>
+        </details>
+      </div>
+    </article>
+
+    <!-- dim_produto -->
+    <article class="table-card" id="tab-dim_produto">
+      <div class="table-card-head">
+        <span class="table-card-name">dim_produto</span>
+        <span class="badge-inline dim">Dimensão</span>
+        <span class="table-card-meta">· 1 linha = 1 SKU (produto + sabor) · 8 colunas</span>
+      </div>
+      <div class="table-card-body">
+        <p>Dimensão de produtos — derivada da mesma planilha de vendas, com deduplicação e parsing de nomes. Gerencia a hierarquia <strong>tipo → categoria → produto → sabor</strong>. Serve de eixo para análise de Pareto e gráficos de dispersão por produto.</p>
+        <div class="label">Colunas</div>
+        <table class="col-table">
+          <thead><tr><th>Coluna</th><th>Tipo</th><th>Papel</th><th>Notas</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id_produto</td><td class="col-type">int64</td><td class="col-papel">Chave primária</td><td class="col-notas">Gerado por índice na transformação</td></tr>
+            <tr><td class="col-name">tipo</td><td class="col-type">string</td><td class="col-papel">Atributo</td><td class="col-notas">Ex: Salgado, Doce</td></tr>
+            <tr><td class="col-name">produto</td><td class="col-type">string</td><td class="col-papel">Atributo</td><td class="col-notas">Nome completo original</td></tr>
+            <tr><td class="col-name">produto simplif</td><td class="col-type">string</td><td class="col-papel">Atributo</td><td class="col-notas">Nome sem detalhes extras</td></tr>
+            <tr><td class="col-name">sabor</td><td class="col-type">string</td><td class="col-papel">Atributo</td><td class="col-notas">Extraído do nome</td></tr>
+            <tr><td class="col-name">produto e sabor</td><td class="col-type">string</td><td class="col-papel">Atributo</td><td class="col-notas">"produto_simplif (sabor)"</td></tr>
+            <tr><td class="col-name">produto completo</td><td class="col-type">string</td><td class="col-papel">Atributo</td><td class="col-notas">"produto (sabor)" — forma longa</td></tr>
+            <tr><td class="col-name">Categoria</td><td class="col-type">string</td><td class="col-papel">Atributo</td><td class="col-notas">Primeira palavra do produto simplif; "Mini" → "Salgadinhos"</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <!-- dim_calendario -->
+    <article class="table-card" id="tab-dim_calendario">
+      <div class="table-card-head">
+        <span class="table-card-name">dim_calendario</span>
+        <span class="badge-inline dim">Dimensão</span>
+        <span class="table-card-meta">· 1 linha = 1 dia · calculada · CALENDARAUTO()</span>
+      </div>
+      <div class="table-card-body">
+        <p>Tabela calendário calculada que expande automaticamente para cobrir o intervalo de datas da ft_vendas. Fornece o eixo temporal para todos os cálculos YoY e filtros de data nos visuais. Time Intelligence desativada no modelo — os cálculos LY/YoY são implementados manualmente via SAMEPERIODLASTYEAR nas medidas.</p>
+        <div class="label">Colunas</div>
+        <table class="col-table">
+          <thead><tr><th>Coluna</th><th>Tipo</th><th>Papel</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">Date</td><td class="col-type">dateTime</td><td class="col-papel">Chave primária</td></tr>
+            <tr><td class="col-name">Ano</td><td class="col-type">calculada</td><td class="col-papel">YEAR([Date])</td></tr>
+            <tr><td class="col-name">Mês Num</td><td class="col-type">calculada</td><td class="col-papel">MONTH([Date])</td></tr>
+            <tr><td class="col-name">Mês abrev</td><td class="col-type">calculada</td><td class="col-papel">FORMAT([Date],"mmm","PT-BR")</td></tr>
+            <tr><td class="col-name">Mês Ano</td><td class="col-type">calculada</td><td class="col-papel">[Mês abrev] &amp; " - " &amp; [Ano]</td></tr>
+            <tr><td class="col-name">Dia Mês</td><td class="col-type">calculada</td><td class="col-papel">DAY([Date])</td></tr>
+            <tr><td class="col-name">Dia Sem</td><td class="col-type">calculada</td><td class="col-papel">FORMAT ordenado por Dia Sem Num</td></tr>
+            <tr><td class="col-name">Dia Sem Num</td><td class="col-type">calculada</td><td class="col-papel">WEEKDAY([Date])</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <!-- Tabelas de medidas resumidas -->
+    <article class="table-card" id="tab-medidas">
+      <div class="table-card-head">
+        <span class="table-card-name">Medidas</span>
+        <span class="badge-inline med">Medidas</span>
+        <span class="table-card-meta">· ~33 medidas DAX · tabela-mãe do modelo</span>
+      </div>
+      <div class="table-card-body">
+        <p>Tabela-container principal — sem dados reais, só medidas DAX. Abriga as métricas base (Faturamento, Custos, Margem), todas as versões LY e os YoY comparativos, além da lógica de precificação com margem de segurança. É a tabela-mãe: a maioria das medidas das outras tabelas dependem direta ou indiretamente das medidas daqui.</p>
+      </div>
+    </article>
+
+    <article class="table-card" id="tab-medidas-df">
+      <div class="table-card-head">
+        <span class="table-card-name">Medidas DF</span>
+        <span class="badge-inline med">Medidas</span>
+        <span class="table-card-meta">· 11 medidas DAX · Dynamic Fields</span>
+      </div>
+      <div class="table-card-body">
+        <p>Medidas dinâmicas para visuais com campos selecionáveis. Agrupa os switches de Evolução (coluna e linha), Dispersão (X e Y) e Análise por Produto — medidas que redirecionam para outras medidas conforme o campo escolhido pelo usuário via parâmetro.</p>
+      </div>
+    </article>
+
+    <article class="table-card" id="tab-medidas-pareto">
+      <div class="table-card-head">
+        <span class="table-card-name">Medidas Pareto</span>
+        <span class="badge-inline med">Medidas</span>
+        <span class="table-card-meta">· 8 medidas DAX · concentração de receita</span>
+      </div>
+      <div class="table-card-body">
+        <p>Lógica completa do gráfico de Pareto por produto — faturamento acumulado ordenado por ranking, percentual Pareto, filtro de corte dinâmico e ranking por produto. Depende da tabela de parâmetro <strong>Seleção Pareto</strong> para o threshold (60%–100%).</p>
+      </div>
+    </article>
+
+    <!-- Parâmetros -->
+    <article class="table-card" id="tab-parametros">
+      <div class="table-card-head">
+        <span class="table-card-name">Parâmetros de Campo (7)</span>
+        <span class="badge-inline aux">Parâmetro</span>
+        <span class="table-card-meta">· GENERATESERIES · slicers interativos</span>
+      </div>
+      <div class="table-card-body">
+        <p>Tabelas geradas com <code style="font-family:var(--font-mono);color:var(--accent-gold-bright);">GENERATESERIES</code> ou literais calculados. Servem de slicers que alimentam medidas SWITCH — o usuário escolhe um valor e as medidas se adaptam automaticamente.</p>
+        <div class="label">Lista de parâmetros</div>
+        <table class="col-table">
+          <thead><tr><th>Parâmetro</th><th>Opções</th><th>Controla</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">% Margem Segurança</td><td class="col-type">0%–100% step 5% · def: 20%</td><td class="col-papel">Preço Mín Recomendado</td></tr>
+            <tr><td class="col-name">Seleção Pareto</td><td class="col-type">60%–100% step 10% · def: 80%</td><td class="col-papel">Corte da curva Pareto</td></tr>
+            <tr><td class="col-name">_Campos Tipo Margem</td><td class="col-type">% / R$</td><td class="col-papel">Switch tipo de margem</td></tr>
+            <tr><td class="col-name">_Campos Evol Col / Lin</td><td class="col-type">8 métricas cada</td><td class="col-papel">Eixos gráfico de evolução</td></tr>
+            <tr><td class="col-name">_Campos Disp X / Y</td><td class="col-type">7 métricas cada</td><td class="col-papel">Eixos scatter plot</td></tr>
+            <tr><td class="col-name">_Campos Disp Legenda</td><td class="col-type">Tipo / Categoria / Produto</td><td class="col-papel">Cor/legenda do scatter</td></tr>
+            <tr><td class="col-name">_Campos Medidas Produtos</td><td class="col-type">6 métricas</td><td class="col-papel">Métrica análise por produto</td></tr>
+            <tr><td class="col-name">_Campos Produto</td><td class="col-type">4 granularidades</td><td class="col-papel">Eixo de produto nos visuais</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <hr class="section-divider"/>
+
+  <!-- 02 · Medidas -->
+  <section id="medidas">
+    <div class="section-orb blue-wide"   style="left:-5%;top:8%;width:1050px;height:720px;" aria-hidden="true"></div>
+    <div class="section-orb purple-hint" style="right:-15%;bottom:0%;width:700px;height:700px;" aria-hidden="true"></div>
+    <p class="section-eyebrow">02 · Medidas</p>
+    <h2 class="section-title">Catálogo de <span class="gold">medidas</span></h2>
+    <p class="section-desc">60 medidas em 6 grupos. Nomenclatura: <code style="font-family:var(--font-mono);color:var(--accent-gold-bright);">Prefixo | Nome</code> onde <strong>C</strong> = valor, <strong>%</strong> = percentual, <strong>T</strong> = texto, <strong>M</strong> = switch/dinâmica. Clique em qualquer medida para expandir o DAX e a explicação.</p>
+
+    <!-- GRUPO BASE -->
+    <div class="measure-group" id="grp-base">
+      <div class="measure-group-title">Base Operacional</div>
+      <div class="measure-group-meta">Tabela: Medidas · métricas-raiz do modelo</div>
+
+      <details class="measure-mini anchor" open>
+        <summary><span class="name">C | Faturamento</span><span class="dax">SUM(ft_vendas[faturamento])</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code> · Format: <code>R$ #,0</code></p>
+          <p class="desc"><strong>O que faz:</strong> soma a receita bruta de todos os itens vendidos no contexto de filtro. Medida-mãe do modelo — praticamente todas as outras métricas derivam direta ou indiretamente dela.</p>
+          <pre class="code"><span class="f">SUM</span>(<span class="s">ft_vendas</span>[<span class="s">faturamento</span>])</pre>
+          <div class="label">Como funciona</div>
+          <p class="desc">Agregação simples. O contexto de filtro (período, produto, categoria) é controlado pelos visuais e slicers — a medida em si não impõe nenhum filtro adicional.</p>
+          <div class="label">É usada por</div>
+          <p class="measure-deps"><code>C | LY Faturamento</code> · <code>% | YoY Faturamento</code> · <code>% | Margem Bruta %</code> · <code>C | Ticket Médio</code> · <code>C | Preço un médio</code> · <code>C | Faturamento Acum</code> · <code>% | Pareto</code> · <code>M | Switch Evol Col/Lin</code> · <code>M | Switch Dispersão X/Y</code></p>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">C | Custos</span><span class="dax">SUM(ft_vendas[custo])</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code> · Format: <code>geral</code></p>
+          <p class="desc"><strong>O que faz:</strong> soma total dos custos diretos dos itens vendidos.</p>
+          <pre class="code"><span class="f">SUM</span>(<span class="s">ft_vendas</span>[<span class="s">custo</span>])</pre>
+          <div class="label">É usada por</div>
+          <p class="measure-deps"><code>C | Margem Bruta R$</code> · <code>C | LY Custos</code> · <code>C | Custo un</code> · <code>% | YoY Custos</code></p>
+        </div>
+      </details>
+
+      <details class="measure-mini anchor" open>
+        <summary><span class="name">C | Margem Bruta R$</span><span class="dax">[C | Faturamento] - [C | Custos]</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code> · Format: <code>geral</code></p>
+          <p class="desc"><strong>O que faz:</strong> diferença entre receita e custo direto — margem bruta absoluta. Serve de base para % Margem e todas as comparações temporais.</p>
+          <pre class="code">[<span class="s">C | Faturamento</span>] - [<span class="s">C | Custos</span>]</pre>
+          <div class="label">É usada por</div>
+          <p class="measure-deps"><code>% | Margem Bruta %</code> · <code>C | LY Margem Bruta R$</code> · <code>% | YoY Margem R$</code> · <code>M | Switch Tipo Margem</code></p>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">% | Margem Bruta %</span><span class="dax">DIVIDE([C | Margem Bruta R$], [C | Faturamento])</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code> · Format: <code>0.00%</code></p>
+          <p class="desc"><strong>O que faz:</strong> margem bruta percentual. Usa DIVIDE para proteção automática contra divisão por zero.</p>
+          <pre class="code"><span class="f">DIVIDE</span>([<span class="s">C | Margem Bruta R$</span>], [<span class="s">C | Faturamento</span>])</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">C | Qtd Pedidos</span><span class="dax">DISTINCTCOUNT(ft_vendas[num_pedido])</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code> · Format: <code>#,0</code></p>
+          <p class="desc"><strong>O que faz:</strong> contagem distinta de pedidos — diferente de contagem de linhas, pois 1 pedido pode conter vários itens.</p>
+          <pre class="code"><span class="f">DISTINCTCOUNT</span>(<span class="s">ft_vendas</span>[<span class="s">num_pedido</span>])</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">C | Ticket Médio</span><span class="dax">DIVIDE([C | Faturamento], [C | Qtd Pedidos])</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code></p>
+          <p class="desc"><strong>O que faz:</strong> valor médio por pedido — faturamento dividido pelo número distinto de pedidos.</p>
+          <pre class="code"><span class="f">DIVIDE</span>([<span class="s">C | Faturamento</span>], [<span class="s">C | Qtd Pedidos</span>])</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">C | Qtd Vendida Produtos</span><span class="dax">SUM(ft_vendas[quantidade])</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code> · Format: <code>0</code></p>
+          <p class="desc"><strong>O que faz:</strong> total de unidades vendidas (soma das quantidades de cada linha de pedido).</p>
+          <pre class="code"><span class="f">SUM</span>(<span class="s">ft_vendas</span>[<span class="s">quantidade</span>])</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">C | Preço un médio</span><span class="dax">DIVIDE([C | Faturamento], [C | Qtd Vendida Produtos])</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code></p>
+          <p class="desc"><strong>O que faz:</strong> preço médio realizado por unidade. Insumo direto para a análise de margem de segurança.</p>
+          <pre class="code"><span class="f">DIVIDE</span>([<span class="s">C | Faturamento</span>], [<span class="s">C | Qtd Vendida Produtos</span>])</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">C | Custo un</span><span class="dax">DIVIDE([C | Custos], [C | Qtd Vendida Produtos])</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code></p>
+          <p class="desc"><strong>O que faz:</strong> custo médio por unidade. Par do Preço un médio para calcular margem unitária.</p>
+          <pre class="code"><span class="f">DIVIDE</span>([<span class="s">C | Custos</span>], [<span class="s">C | Qtd Vendida Produtos</span>])</pre>
+          <div class="label">É usada por</div>
+          <p class="measure-deps"><code>C | Preço Mín Recomendado</code></p>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">C | Média Pedidos por dia</span><span class="dax">DIVIDE([C | Qtd Pedidos], DISTINCTCOUNT(ft_vendas[data]))</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code></p>
+          <p class="desc"><strong>O que faz:</strong> pedidos por dia com movimento — boa proxy de cadência operacional do negócio.</p>
+          <pre class="code"><span class="f">DIVIDE</span>([<span class="s">C | Qtd Pedidos</span>], <span class="f">DISTINCTCOUNT</span>(<span class="s">ft_vendas</span>[<span class="s">data</span>]))</pre>
+        </div>
+      </details>
+    </div>
+
+    <!-- GRUPO LY -->
+    <div class="measure-group" id="grp-ly">
+      <div class="measure-group-title">Comparativo Ano Anterior (LY)</div>
+      <div class="measure-group-meta">Tabela: Medidas · padrão SAMEPERIODLASTYEAR para todas as métricas base</div>
+
+      <details class="measure-mini anchor" open>
+        <summary><span class="name">C | LY Faturamento</span><span class="dax">CALCULATE([C | Faturamento], SAMEPERIODLASTYEAR(...))</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code> · Format: <code>0</code></p>
+          <p class="desc"><strong>O que faz:</strong> faturamento do mesmo período do ano anterior. Âncora dos cálculos YoY — todas as variações percentuais dependem desta (e das suas irmãs LY).</p>
+          <pre class="code"><span class="f">CALCULATE</span>([<span class="s">C | Faturamento</span>], <span class="f">SAMEPERIODLASTYEAR</span>(<span class="s">dim_calendario</span>[<span class="s">Date</span>]))</pre>
+          <div class="label">Como funciona</div>
+          <p class="desc">SAMEPERIODLASTYEAR desloca o contexto de filtro de data um ano para trás. Como Time Intelligence está desativada no modelo, essa função é chamada explicitamente em cada medida LY — ao invés de ser usada via autoDate.</p>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">LY Custos · LY Margem Bruta R$ · LY Margem % · LY Ticket Médio · LY Qtd Pedidos · LY Qtd Vendida</span><span class="dax">CALCULATE([métrica], SAMEPERIODLASTYEAR(...))</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>Padrão idêntico</strong> ao LY Faturamento — mesma lógica aplicada a cada métrica base. São 7 medidas LY no total, uma por métrica relevante.</p>
+          <pre class="code"><span class="f">CALCULATE</span>([<span class="s">[métrica base]</span>], <span class="f">SAMEPERIODLASTYEAR</span>(<span class="s">dim_calendario</span>[<span class="s">Date</span>]))</pre>
+        </div>
+      </details>
+    </div>
+
+    <!-- GRUPO YoY -->
+    <div class="measure-group" id="grp-yoy">
+      <div class="measure-group-title">Variações Year-over-Year</div>
+      <div class="measure-group-meta">Tabela: Medidas · padrão COALESCE(DIVIDE(...), "-") para evitar erros em anos iniciais</div>
+
+      <details class="measure-mini anchor" open>
+        <summary><span class="name">% | YoY Faturamento</span><span class="dax">COALESCE(DIVIDE([C | Fat] - [C | LY Fat], [C | LY Fat]), "-")</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code> · Format: <code>0.00%</code></p>
+          <p class="desc"><strong>O que faz:</strong> variação percentual de faturamento vs. mesmo período do ano anterior. COALESCE retorna "-" quando não há período anterior — evita erros em anos iniciais ou sem dados.</p>
+          <pre class="code"><span class="f">COALESCE</span>(
+  <span class="f">DIVIDE</span>([<span class="s">C | Faturamento</span>] - [<span class="s">C | LY Faturamento</span>], [<span class="s">C | LY Faturamento</span>]),
+  <span class="s">"-"</span>
+)</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">YoY Custos · YoY Margem R$ · YoY Margem % · YoY Ticket Médio · YoY Pedidos · YoY Qtd · YoY Média Pedidos</span><span class="dax">COALESCE(DIVIDE([métrica] - [LY métrica], [LY métrica]), "-")</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>Mesmo padrão YoY</strong> para todas as métricas. Algumas usam VAR para calcular o LY inline quando a métrica não tem tabela LY própria (ex: Média Pedidos por dia).</p>
+          <pre class="code"><span class="c">-- Variante com VAR inline (Média Pedidos por dia)</span>
+<span class="k">VAR</span> <span class="s">vLY</span> = <span class="f">CALCULATE</span>([<span class="s">C | Média Pedidos por dia</span>], <span class="f">SAMEPERIODLASTYEAR</span>(<span class="s">dim_calendario</span>[<span class="s">Date</span>]))
+<span class="k">RETURN</span> <span class="f">COALESCE</span>(<span class="f">DIVIDE</span>([<span class="s">C | Média Pedidos por dia</span>] - <span class="s">vLY</span>, <span class="s">vLY</span>), <span class="s">"-"</span>)</pre>
+        </div>
+      </details>
+    </div>
+
+    <!-- GRUPO MARGEM -->
+    <div class="measure-group" id="grp-margem">
+      <div class="measure-group-title">Precificação &amp; Margem de Segurança</div>
+      <div class="measure-group-meta">Tabela: Medidas · análise de preço vs. custo com threshold dinâmico via parâmetro</div>
+
+      <details class="measure-mini anchor" open>
+        <summary><span class="name">C | Preço Mín Recomendado</span><span class="dax">DIVIDE(-[C | Custo un], [Valor % Margem Segurança] - 1)</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas</code></p>
+          <p class="desc"><strong>O que faz:</strong> preço mínimo para cobrir o custo unitário respeitando a margem de segurança selecionada no slicer. Fórmula: <strong>Custo ÷ (1 − margem%)</strong>.</p>
+          <pre class="code"><span class="f">DIVIDE</span>(
+  -[<span class="s">C | Custo un</span>],
+  [<span class="s">Valor % Margem Segurança</span>] - 1
+)</pre>
+          <div class="label">Como funciona</div>
+          <p class="desc">O parâmetro <code>% Margem Segurança</code> retorna um valor entre 0 e 1. A fórmula aplica a regra de precificação cost-plus invertida: se o custo é R$ 8 e a margem desejada é 20%, o preço mínimo é R$ 8 ÷ (1 − 0,20) = R$ 10.</p>
+          <div class="label">Depende de</div>
+          <p class="measure-deps"><code>C | Custo un</code> · <code>Valor % Margem Segurança</code> (parâmetro)</p>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">% | Var Preço</span><span class="dax">DIVIDE([Preço un médio] - [Preço Mín], [Preço Mín])</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que faz:</strong> distância entre o preço realizado e o preço mínimo recomendado. Positivo = acima da margem segura; <strong>negativo = alerta</strong> (produto vendido abaixo do mínimo).</p>
+          <pre class="code"><span class="f">DIVIDE</span>(
+  [<span class="s">C | Preço un médio</span>] - [<span class="s">C | Preço Mín Recomendado</span>],
+  [<span class="s">C | Preço Mín Recomendado</span>]
+)</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">C | Qtd Produtos Margem Baixa</span><span class="dax">COALESCE(CALCULATE(COUNTROWS(...), FILTER(..., [% | Var Preço] &lt; 0)), 0)</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que faz:</strong> conta combinações produto×quantidade com preço abaixo do mínimo recomendado. COALESCE garante retorno de 0 (não BLANK) quando todos os produtos estão acima do mínimo.</p>
+          <pre class="code"><span class="f">COALESCE</span>(
+  <span class="f">CALCULATE</span>(
+    <span class="f">COUNTROWS</span>(<span class="f">VALUES</span>(<span class="s">ft_vendas</span>[<span class="s">id_produto_qtd</span>])),
+    <span class="f">FILTER</span>(<span class="f">VALUES</span>(<span class="s">ft_vendas</span>[<span class="s">id_produto_qtd</span>]),
+      [<span class="s">% | Var Preço</span>] &lt; 0)
+  ), 0
+)</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">T | Qtd Produtos Margem Baixa</span><span class="dax">SWITCH(count, 0 → "Não existem...", 1 → "Existe 1...", "Existem N...")</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que faz:</strong> mensagem contextual para card de aviso — texto muda conforme a quantidade de produtos em alerta. Inclui o percentual de margem selecionado formatado dinamicamente.</p>
+          <pre class="code"><span class="f">SWITCH</span>([<span class="s">C | Qtd Produtos Margem Baixa</span>],
+  0, <span class="s">"Não existem itens abaixo da margem de segurança de "</span>
+      &amp; <span class="f">FORMAT</span>([<span class="s">Valor % Margem Segurança</span>], <span class="s">"0%"</span>) &amp; <span class="s">"."</span>,
+  1, <span class="s">"Existe 1 item abaixo da margem..."</span>,
+  <span class="s">"Existem "</span> &amp; [<span class="s">C | Qtd Produtos Margem Baixa</span>] &amp; <span class="s">" itens abaixo..."</span>
+)</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">M | Switch Tipo Margem</span><span class="dax">SWITCH(SELECTEDVALUE(...), 0 → Margem %, 1 → Margem R$)</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que faz:</strong> retorna margem em % ou R$ conforme a seleção do parâmetro <code>_Campos Tipo Margem</code>. Usado diretamente no YoY de tipo de margem.</p>
+          <pre class="code"><span class="f">SWITCH</span>(
+  <span class="f">SELECTEDVALUE</span>(<span class="s">'_Campos Tipo Margem'</span>[<span class="s">_Campos Tipo Margem Pedido</span>]),
+  0, [<span class="s">% | Margem Bruta %</span>],
+  1, [<span class="s">C | Margem Bruta R$</span>]
+)</pre>
+        </div>
+      </details>
+    </div>
+
+    <!-- GRUPO PARETO -->
+    <div class="measure-group" id="grp-pareto">
+      <div class="measure-group-title">Análise de Pareto</div>
+      <div class="measure-group-meta">Tabela: Medidas Pareto · concentração de receita por produto com threshold dinâmico</div>
+
+      <details class="measure-mini anchor" open>
+        <summary><span class="name">C | Faturamento Acum</span><span class="dax">VAR vFatContexto = [C | Fat] → acumula produtos com Fat ≥ contexto</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas Pareto</code> · Format: <code>R$ #,0</code></p>
+          <p class="desc"><strong>O que faz:</strong> acumula o faturamento de todos os produtos com faturamento igual ou maior ao do produto no contexto atual — ordena implicitamente do maior para o menor. Padrão clássico de Pareto em DAX.</p>
+          <pre class="code"><span class="k">VAR</span> <span class="s">vFatContexto</span> = [<span class="s">C | Faturamento</span>]
+<span class="k">VAR</span> <span class="s">vFatAcumulado</span> =
+  <span class="f">CALCULATE</span>([<span class="s">C | Faturamento</span>],
+    <span class="f">FILTER</span>(<span class="f">ALLSELECTED</span>(<span class="s">dim_produto</span>),
+      [<span class="s">C | Faturamento</span>] &gt;= <span class="s">vFatContexto</span>))
+<span class="k">RETURN</span> <span class="s">vFatAcumulado</span></pre>
+          <div class="label">Como funciona</div>
+          <p class="desc">Para cada produto na tabela, calcula quantos produtos têm faturamento maior ou igual — e soma o faturamento deles. O resultado é um valor crescente: o top produto tem valor = seu faturamento, o segundo acumula os dois, e assim por diante.</p>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">% | Pareto</span><span class="dax">DIVIDE([C | Faturamento Acum], CALCULATE([C | Fat], ALLSELECTED(dim_produto)))</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que faz:</strong> percentual acumulado de faturamento — vai de próximo de 0% (produto no topo) até 100% (todos os produtos). A curva 80/20 é lida onde % Pareto ≤ 80%.</p>
+          <pre class="code"><span class="k">VAR</span> <span class="s">vFatTotal</span> = <span class="f">CALCULATE</span>([<span class="s">C | Faturamento</span>], <span class="f">ALLSELECTED</span>(<span class="s">dim_produto</span>))
+<span class="k">RETURN</span> <span class="f">DIVIDE</span>([<span class="s">C | Faturamento Acum</span>], <span class="s">vFatTotal</span>)</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">C | Faturamento Par % · C | Qtd Produtos Pareto · % | Qtd Produtos Pareto</span><span class="dax">FILTER(ALLSELECTED(dim_produto), [% | Pareto] ≤ threshold)</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que fazem:</strong> métricas para o KPI "N% dos produtos geram X% do faturamento". Filtram a lista de produtos ao corte Pareto selecionado (ex: top 80%) e calculam o faturamento acumulado e a proporção do catálogo.</p>
+          <pre class="code"><span class="c">-- C | Faturamento Par %</span>
+<span class="f">CALCULATE</span>([<span class="s">C | Faturamento</span>],
+  <span class="f">FILTER</span>(<span class="f">ALLSELECTED</span>(<span class="s">dim_produto</span>), [<span class="s">% | Pareto</span>] &lt;= [<span class="s">Valor Seleção Pareto</span>]))
+
+<span class="c">-- C | Qtd Produtos Pareto</span>
+<span class="f">CALCULATE</span>(<span class="f">COUNTROWS</span>(
+  <span class="f">FILTER</span>(<span class="f">ALLSELECTED</span>(<span class="s">dim_produto</span>), [<span class="s">% | Pareto</span>] &lt;= [<span class="s">Valor Seleção Pareto</span>])))</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">C | Ranking Pareto</span><span class="dax">IF(ISINSCOPE(dim_produto[produto e sabor]), RANKX(ALL(dim_produto), [C | Fat],, DESC))</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que faz:</strong> rank de faturamento por produto. ISINSCOPE garante que o rank só aparece no nível de produto, não em linhas de total ou subtotal.</p>
+          <pre class="code"><span class="f">IF</span>(<span class="f">ISINSCOPE</span>(<span class="s">dim_produto</span>[<span class="s">produto e sabor</span>]),
+  <span class="f">RANKX</span>(<span class="f">ALL</span>(<span class="s">dim_produto</span>), [<span class="s">C | Faturamento</span>],, <span class="k">DESC</span>)
+)</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">Filtro Pareto</span><span class="dax">IF([% | Pareto] ≤ [Valor Seleção Pareto], 1, 0)</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que faz:</strong> flag 1/0 para filtrar a tabela de produtos ao corte Pareto. Usada como filtro visual em tabelas e slicers.</p>
+          <pre class="code"><span class="f">IF</span>([<span class="s">% | Pareto</span>] &lt;= [<span class="s">Valor Seleção Pareto</span>], 1, 0)</pre>
+        </div>
+      </details>
+    </div>
+
+    <!-- GRUPO DF -->
+    <div class="measure-group" id="grp-df">
+      <div class="measure-group-title">Dynamic Fields</div>
+      <div class="measure-group-meta">Tabela: Medidas DF · switches para visuais com campos selecionáveis pelo usuário</div>
+
+      <details class="measure-mini anchor" open>
+        <summary><span class="name">M | Switch Evol Col / Lin</span><span class="dax">SWITCH(SELECTEDVALUE(_Campos_Evol_Col[Pedido]), 0 → Fat, 1 → Custos ... 7 → LY Margem%)</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="meta">Tabela: <code>Medidas DF</code></p>
+          <p class="desc"><strong>O que fazem:</strong> direcionam para uma das 8 métricas conforme o seletor de campo de evolução (Faturamento, Custos, Margem R$, Margem %, e as 4 versões LY correspondentes). Um switch por eixo (coluna e linha).</p>
+          <pre class="code"><span class="f">SWITCH</span>(<span class="f">SELECTEDVALUE</span>(<span class="s">_Campos_Evol_Col</span>[<span class="s">_Campos_Evol_Col Pedido</span>]),
+  0, [<span class="s">C | Faturamento</span>],    1, [<span class="s">C | Custos</span>],
+  2, [<span class="s">C | Margem Bruta R$</span>], 3, [<span class="s">% | Margem Bruta %</span>],
+  4, [<span class="s">C | LY Faturamento</span>],  5, [<span class="s">C | LY Custos</span>],
+  6, [<span class="s">C | LY Margem Bruta R$</span>], 7, [<span class="s">% | LY Margem Bruta %</span>]
+)</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">% | YoY Evol Col / % | YoY Evol Lin</span><span class="dax">VAR vLY = CALCULATE([M | Switch Evol Col], SAMEPERIODLASTYEAR(...)) → DIVIDE variação</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que fazem:</strong> YoY dinâmico — calcula a variação percentual da métrica selecionada vs. ano anterior. O LY é calculado inline via VAR para evitar dependência de uma tabela LY específica.</p>
+          <pre class="code"><span class="k">VAR</span> <span class="s">vLY</span> = <span class="f">CALCULATE</span>([<span class="s">M | Switch Evol Col</span>],
+              <span class="f">SAMEPERIODLASTYEAR</span>(<span class="s">dim_calendario</span>[<span class="s">Date</span>]))
+<span class="k">RETURN</span>
+  <span class="f">COALESCE</span>(<span class="f">DIVIDE</span>([<span class="s">M | Switch Evol Col</span>] - <span class="s">vLY</span>, <span class="s">vLY</span>), <span class="s">"-"</span>)</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">M | Switch Medidas Produtos</span><span class="dax">SWITCH(0–5 → Fat, Custos, Margem R$, Margem %, Qtd Vendida, Qtd Pedidos)</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que faz:</strong> métrica dinâmica para o visual de análise por produto — 6 opções selecionáveis via parâmetro <code>_Campos Medidas Produtos</code>.</p>
+          <pre class="code"><span class="f">SWITCH</span>(<span class="f">SELECTEDVALUE</span>(<span class="s">_Campos_Medidas_Produtos</span>[<span class="s">Pedido</span>]),
+  0, [<span class="s">C | Faturamento</span>],     1, [<span class="s">C | Custos</span>],
+  2, [<span class="s">C | Margem Bruta R$</span>], 3, [<span class="s">% | Margem Bruta %</span>],
+  4, [<span class="s">C | Qtd Vendida Produtos</span>], 5, [<span class="s">C | Qtd Pedidos</span>]
+)</pre>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">M | Switch Dispersão X / Y</span><span class="dax">SWITCH(0–6 → 7 métricas para eixos do scatter plot)</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que fazem:</strong> eixos X e Y do scatter plot — 7 métricas disponíveis (Faturamento, Custos, Margem %, Margem R$, Qtd Pedidos, Qtd Vendida, Ticket Médio). Permite exploração livre de correlações entre quaisquer dois indicadores.</p>
+        </div>
+      </details>
+
+      <details class="measure-mini">
+        <summary><span class="name">T | Switch nome parâmetro Produto</span><span class="dax">SWITCH(0–3 → SELECTEDVALUE(dim_produto[campo correspondente]))</span><span class="toggle">+</span></summary>
+        <div class="mini-body">
+          <p class="desc"><strong>O que faz:</strong> retorna o nome do produto no nível de granularidade selecionado — produto simplif, produto+sabor, só sabor, ou quantidade.</p>
+          <pre class="code"><span class="f">SWITCH</span>(<span class="f">SELECTEDVALUE</span>(<span class="s">_Campos_Produto</span>[<span class="s">Pedido</span>]),
+  0, <span class="f">SELECTEDVALUE</span>(<span class="s">dim_produto</span>[<span class="s">produto simplif</span>]),
+  1, <span class="f">SELECTEDVALUE</span>(<span class="s">dim_produto</span>[<span class="s">produto e sabor</span>]),
+  2, <span class="f">SELECTEDVALUE</span>(<span class="s">dim_produto</span>[<span class="s">sabor</span>]),
+  3, <span class="f">SELECTEDVALUE</span>(<span class="s">ft_vendas</span>[<span class="s">quantidade</span>])
+)</pre>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <hr class="section-divider"/>
+
+  <!-- 03 · Relacionamentos -->
+  <section id="relacionamentos">
+    <div class="section-orb purple-wide" style="right:-8%;top:8%;width:1050px;height:700px;" aria-hidden="true"></div>
+    <div class="section-orb blue-hint"   style="left:-18%;bottom:0%;width:700px;height:700px;" aria-hidden="true"></div>
+    <p class="section-eyebrow">03 · Relacionamentos</p>
+    <h2 class="section-title">Mapa de <span class="gold">relacionamentos</span></h2>
+    <p class="section-desc">Star schema clássico — 1 fato central com 2 dimensões. Ambos os relacionamentos são ativos, N:1 e unidirecionais. Tabelas de medidas e parâmetros ficam isoladas (comunicação via SELECTEDVALUE no DAX, sem chave de relacionamento).</p>
+
+    <svg class="rel-svg" viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#7099FF"/>
+        </marker>
+      </defs>
+      <!-- dim_calendario -->
+      <rect x="20" y="30" width="180" height="70" rx="10" fill="rgba(70,104,212,0.12)" stroke="rgba(112,153,255,0.4)" stroke-width="1"/>
+      <text x="110" y="58" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="13" font-weight="700" letter-spacing="1" fill="#7099FF">DIM</text>
+      <text x="110" y="78" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="12" fill="#F0EFF8">dim_calendario</text>
+      <text x="110" y="93" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="10" fill="#6B729A">Date (PK)</text>
+      <!-- dim_produto -->
+      <rect x="500" y="30" width="180" height="70" rx="10" fill="rgba(70,104,212,0.12)" stroke="rgba(112,153,255,0.4)" stroke-width="1"/>
+      <text x="590" y="58" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="13" font-weight="700" letter-spacing="1" fill="#7099FF">DIM</text>
+      <text x="590" y="78" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="12" fill="#F0EFF8">dim_produto</text>
+      <text x="590" y="93" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="10" fill="#6B729A">id_produto (PK)</text>
+      <!-- ft_vendas -->
+      <rect x="230" y="170" width="240" height="80" rx="10" fill="rgba(196,127,255,0.10)" stroke="rgba(196,127,255,0.4)" stroke-width="1"/>
+      <text x="350" y="198" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="13" font-weight="700" letter-spacing="1" fill="#C47FFF">FATO</text>
+      <text x="350" y="218" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="12" fill="#F0EFF8">ft_vendas</text>
+      <text x="350" y="235" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="10" fill="#6B729A">data (FK) · id_produto (FK)</text>
+      <!-- Seta dim_calendario → ft_vendas (N:1) -->
+      <line x1="160" y1="100" x2="300" y2="170" stroke="#7099FF" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="195" y="148" font-family="'Barlow Condensed',sans-serif" font-size="11" fill="#7099FF" font-weight="700">N:1</text>
+      <!-- Seta dim_produto → ft_vendas (N:1) -->
+      <line x1="530" y1="100" x2="440" y2="170" stroke="#7099FF" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="484" y="148" font-family="'Barlow Condensed',sans-serif" font-size="11" fill="#7099FF" font-weight="700">N:1</text>
+      <!-- Labels relação -->
+      <text x="350" y="265" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="11" fill="#6B729A" font-style="italic">2 relacionamentos ativos · unidirecionais · sem M:M</text>
+    </svg>
+
+    <p class="section-desc"><strong>Tabela detalhada:</strong></p>
+    <table class="rel-table">
+      <thead><tr><th>#</th><th>From</th><th>To</th><th>Card.</th><th>Direção</th><th>Ativo</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--text-muted);">1</td>
+          <td><span class="from">ft_vendas</span><span style="color:var(--text-muted);font-family:var(--font-mono);font-size:11px;">[id_produto]</span></td>
+          <td><span class="to">dim_produto</span><span style="color:var(--text-muted);font-family:var(--font-mono);font-size:11px;">[id_produto]</span></td>
+          <td><span class="card">N:1</span></td>
+          <td><span class="dir-single">Single →</span></td>
+          <td style="color:#3FD1B8;font-weight:600;">✓</td>
+          <td style="color:var(--text-muted);font-size:12px;">—</td>
+        </tr>
+        <tr>
+          <td style="color:var(--text-muted);">2</td>
+          <td><span class="from">ft_vendas</span><span style="color:var(--text-muted);font-family:var(--font-mono);font-size:11px;">[data]</span></td>
+          <td><span class="to">dim_calendario</span><span style="color:var(--text-muted);font-family:var(--font-mono);font-size:11px;">[Date]</span></td>
+          <td><span class="card">N:1</span></td>
+          <td><span class="dir-single">Single →</span></td>
+          <td style="color:#3FD1B8;font-weight:600;">✓</td>
+          <td style="color:var(--text-muted);font-size:12px;">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="section-divider"/>
+
+  <!-- 04 · Dependências -->
+  <section id="dependencias">
+    <div class="section-orb purple-tall" style="right:-8%;top:5%;width:800px;height:1050px;" aria-hidden="true"></div>
+    <div class="section-orb blue-hint"   style="left:-15%;bottom:0%;width:700px;height:700px;" aria-hidden="true"></div>
+    <p class="section-eyebrow">04 · Dependências</p>
+    <h2 class="section-title">Grafo de <span class="gold">dependências</span></h2>
+    <p class="section-desc">Quem depende de quem entre as medidas. Alterar <strong>C | Faturamento</strong> afeta ~12 medidas a jusante — cuidado em refatores.</p>
+
+    <p class="section-desc"><strong>Árvore de C | Preço Mín Recomendado (medida mais profunda):</strong></p>
+    <div class="dep-tree"><span class="root">C | Preço Mín Recomendado</span>
+├── <span class="branch">C | Custo un</span>
+│   ├── <span class="leaf">C | Custos</span>
+│   │   └── <span class="dim">ft_vendas[custo]</span>
+│   └── <span class="leaf">C | Qtd Vendida Produtos</span>
+│       └── <span class="dim">ft_vendas[quantidade]</span>
+└── <span class="leaf">Valor % Margem Segurança</span>
+    └── <span class="dim">'% Margem Segurança'[% Margem Segurança] (parâmetro)</span>
+
+<span class="root">% | Var Preço</span>
+├── <span class="branch">C | Preço un médio</span>
+│   ├── <span class="leaf">C | Faturamento → ft_vendas[faturamento]</span>
+│   └── <span class="leaf">C | Qtd Vendida Produtos → ft_vendas[quantidade]</span>
+└── <span class="branch">C | Preço Mín Recomendado</span> (ver acima)
+
+<span class="root">% | Pareto</span>
+├── <span class="branch">C | Faturamento Acum</span>
+│   └── <span class="leaf">C | Faturamento → ft_vendas[faturamento]</span>
+└── <span class="leaf">C | Faturamento (via ALLSELECTED)</span>
+
+<span class="root">% | YoY Evol Col</span>
+└── <span class="branch">M | Switch Evol Col</span>
+    └── <span class="dim">→ qualquer das 8 métricas base conforme seleção do parâmetro</span></div>
+
+    <p class="section-desc"><strong>Reverse — impacto das medidas-base:</strong></p>
+
+    <div class="dep-reverse-card">
+      <div class="head"><span class="name">C | Faturamento</span><span class="tag">Mais referenciada</span></div>
+      <p class="by">Usada por: <code>C | LY Faturamento</code> · <code>% | YoY Faturamento</code> · <code>% | Margem Bruta %</code> · <code>C | Ticket Médio</code> · <code>C | Preço un médio</code> · <code>C | Faturamento Acum</code> · <code>% | Pareto</code> · <code>C | Faturamento Par %</code> · <code>M | Switch Evol Col</code> · <code>M | Switch Evol Lin</code> · <code>M | Switch Dispersão X</code> · <code>M | Switch Dispersão Y</code></p>
+      <p class="impl">Alterar a definição de Faturamento afeta 12 medidas a jusante. É a medida mais crítica do modelo.</p>
+    </div>
+
+    <div class="dep-reverse-card">
+      <div class="head"><span class="name">C | Margem Bruta R$</span><span class="tag">Alta dependência</span></div>
+      <p class="by">Usada por: <code>% | Margem Bruta %</code> · <code>C | LY Margem Bruta R$</code> · <code>% | YoY Margem R$</code> · <code>M | Switch Tipo Margem</code> · <code>M | Switch Evol Col</code> · <code>M | Switch Evol Lin</code> · <code>M | Switch Medidas Produtos</code> · <code>M | Switch Dispersão X/Y</code></p>
+      <p class="impl">Afeta 8+ medidas. Depende de C | Faturamento e C | Custos.</p>
+    </div>
+
+    <div class="dep-reverse-card">
+      <div class="head"><span class="name">C | Custo un</span><span class="tag">Crítica para precificação</span></div>
+      <p class="by">Usada por: <code>C | Preço Mín Recomendado</code></p>
+      <p class="impl">Medida-chave da análise de margem de segurança. Qualquer alteração na forma de calcular custo unitário impacta diretamente os alertas de preço.</p>
+    </div>
+
+    <div class="dep-reverse-card">
+      <div class="head"><span class="name">% | Pareto</span><span class="tag">Medida-base do Pareto</span></div>
+      <p class="by">Usada por: <code>C | Faturamento Par %</code> · <code>C | Qtd Produtos Pareto</code> · <code>% | Qtd Produtos Pareto</code> · <code>Filtro Pareto</code></p>
+      <p class="impl">Toda a lógica de Pareto (4 medidas) depende desta. Depende de C | Faturamento Acum e do parâmetro Seleção Pareto.</p>
+    </div>
+
+    <p class="section-desc" style="margin-top:32px;"><strong>Tabelas mais referenciadas:</strong></p>
+    <ol style="font-family:var(--font-body);font-size:14px;color:var(--text-primary);padding-left:24px;line-height:2.2;">
+      <li><code style="font-family:var(--font-mono);color:var(--accent-glow);">ft_vendas</code> — referenciada em praticamente todas as medidas base via SUM/DISTINCTCOUNT/COUNTROWS</li>
+      <li><code style="font-family:var(--font-mono);color:var(--accent-glow);">dim_produto</code> — usada em todas as medidas Pareto via ALLSELECTED/VALUES/FILTER</li>
+      <li><code style="font-family:var(--font-mono);color:var(--accent-glow);">dim_calendario</code> — base de todas as medidas LY/YoY via SAMEPERIODLASTYEAR</li>
+      <li><code style="font-family:var(--font-mono);color:var(--accent-glow);">'% Margem Segurança'</code> — parâmetro mais referenciado (precificação + alertas)</li>
+      <li><code style="font-family:var(--font-mono);color:var(--accent-glow);">'Seleção Pareto'</code> — parâmetro central da análise de concentração</li>
+    </ol>
+  </section>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-divider"></div>
+    <p class="footer-text">Documentação gerada automaticamente a partir dos arquivos <strong>TMDL</strong> do projeto Power BI.</p>
+    <p class="footer-meta">gerado em maio 2026 · modelo: Análise de Vendas &amp; Margem</p>
+  </div>
+
+</div>
+</div>
+
+<script>
+(function(){
+  // ── Sidebar mobile toggle ──
+  const menuBtn = document.getElementById('menu-toggle');
+  const sidebar = document.getElementById('sidebar');
+  if (menuBtn && sidebar) {
+    menuBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
+  }
+
+  // ── Scroll spy ──
+  const navLinks = document.querySelectorAll('.sidebar .nav-link');
+  const sections = Array.from(navLinks).map(link => {
+    const id = link.getAttribute('href').slice(1);
+    return { id, link, el: document.getElementById(id) };
+  }).filter(s => s.el);
+
+  function updateActive() {
+    const scrollY = window.scrollY + 120;
+    let current = sections[0];
+    for (const s of sections) {
+      if (s.el.offsetTop <= scrollY) current = s;
+    }
+    navLinks.forEach(l => l.classList.remove('active'));
+    if (current) current.link.classList.add('active');
+  }
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
+
+  // ── Search ──
+  const search = document.getElementById('search');
+  const tableCards = document.querySelectorAll('.table-card');
+  const measureItems = document.querySelectorAll('details.measure-mini');
+  search.addEventListener('input', () => {
+    const q = search.value.trim().toLowerCase();
+    [...tableCards, ...measureItems].forEach(card => {
+      card.style.display = (q === '' || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    });
+  });
+
+  // ── Particle field ──
+  (function initParticles(){
+    const field = document.querySelector('.particle-field');
+    if (!field) return;
+    const N = 28;
+    for (let i = 0; i < N; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle' + (Math.random() < 0.4 ? ' blue' : '');
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.setProperty('--dx', (Math.random() * 60 - 30) + 'px');
+      p.style.animationDuration = (12 + Math.random() * 16) + 's';
+      p.style.animationDelay = (Math.random() * 18) + 's';
+      p.style.opacity = (0.35 + Math.random() * 0.4).toFixed(2);
+      field.appendChild(p);
+    }
+  })();
+
+  // ── Reveal on scroll ──
+  function initReveal(targets){
+    const els = [];
+    targets.forEach(({ sel, stagger }) => {
+      document.querySelectorAll(sel).forEach((el, i) => {
+        el.classList.add('reveal');
+        if (stagger) el.classList.add('r-d' + ((i % 4) + 1));
+        els.push(el);
+      });
+    });
+    if (!('IntersectionObserver' in window)) { els.forEach(el => el.classList.add('is-visible')); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    els.forEach(el => io.observe(el));
+  }
+  initReveal([
+    { sel: '.metric-card', stagger: true }, { sel: '.section-title' }, { sel: '.section-desc' },
+    { sel: '.inv-table' }, { sel: '.callout' }, { sel: '.config-list' },
+    { sel: '.table-card', stagger: true }, { sel: '.measure-group' },
+    { sel: 'details.measure-mini', stagger: true },
+    { sel: '.rel-svg' }, { sel: '.rel-table' }, { sel: '.dep-tree' },
+    { sel: '.dep-reverse-card', stagger: true }, { sel: '.footer' }
+  ]);
+
+  // ── Count-up ──
+  function tryCountUp(el){
+    const txt = el.textContent.trim();
+    const m = txt.match(/^(\d+)(.*)$/);
+    if (!m) return;
+    const target = parseInt(m[1]); const suffix = m[2] || '';
+    if (isNaN(target) || target === 0) return;
+    const duration = 1500; const start = performance.now();
+    const ease = t => 1 - Math.pow(1 - t, 3);
+    function tick(now){
+      const t = Math.min(1, (now - start) / duration);
+      el.textContent = Math.round(ease(t) * target) + suffix;
+      if (t < 1) requestAnimationFrame(tick);
+      else el.classList.add('num-pulse');
+    }
+    el.textContent = '0' + suffix;
+    requestAnimationFrame(tick);
+  }
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { tryCountUp(e.target); io.unobserve(e.target); } });
+    }, { threshold: 0.4 });
+    document.querySelectorAll('.metric-num').forEach(el => io.observe(el));
+  }
+
+  // ── Liquid sidebar indicator ──
+  (function liquidSidebar(){
+    if (!sidebar) return;
+    const pill = document.createElement('div');
+    pill.className = 'nav-liquid';
+    sidebar.appendChild(pill);
+    sidebar.classList.add('has-liquid');
+    function moveTo(link){
+      if (!link) { pill.classList.remove('is-active'); return; }
+      const r = link.getBoundingClientRect();
+      const sr = sidebar.getBoundingClientRect();
+      pill.style.top = (r.top - sr.top + sidebar.scrollTop + 6) + 'px';
+      pill.style.height = (r.height - 12) + 'px';
+      pill.classList.add('is-active');
+    }
+    const mo = new MutationObserver(() => moveTo(sidebar.querySelector('.nav-link.active')));
+    sidebar.querySelectorAll('.nav-link').forEach(l => mo.observe(l, { attributes: true, attributeFilter: ['class'] }));
+    moveTo(sidebar.querySelector('.nav-link.active'));
+    window.addEventListener('resize', () => moveTo(sidebar.querySelector('.nav-link.active')));
+  })();
+})();
+</script>
+
+</body>
+</html>
